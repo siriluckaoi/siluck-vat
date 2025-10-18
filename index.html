@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>คำนวณ VAT + หัก ณ ที่จ่าย — (◉●•◦Siluck◦•●◉)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --gap:14px; --radius:14px;
+      --green:#166534; --green-100:#e6f7e6; --green-200:#cfe6cf; --green-700:#134e13;
+      --gray:#f1f1f1; --gray-border:#cfcfcf;
+      --fs-xs:12.5px; --fs-sm:14px; --fs-md:16px; --fs-lg:18px; --fs-xl:22px;
+    }
+    body{font-family:"Inter","Noto Sans Thai",sans-serif;margin:0;background:#f7f7fb;color:#1f2328;line-height:1.55;}
+    header{background:#fff;border-bottom:1px solid #eee;padding:16px;}
+    h1{font-size:var(--fs-xl);font-weight:600;margin:0 0 4px;}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px;}
+    .zone{background:#fff;border-radius:var(--radius);box-shadow:0 6px 20px rgba(0,0,0,.06);margin-bottom:18px;}
+    .zone-head{background:#fff3cd;padding:12px 16px;font-weight:600;font-size:var(--fs-lg);border-bottom:1px solid #ffe69c;}
+    .zone-body{padding:16px;}
+    .notice{background:var(--gray);border:1px solid var(--gray-border);color:#000;
+      padding:10px 12px;border-radius:10px;font-size:var(--fs-sm);}
+    .zone-grid{display:grid;gap:16px;}
+    @media(min-width:900px){.zone-grid{grid-template-columns:1.1fr .9fr;}}
+    label{font-size:var(--fs-sm);font-weight:500;color:#333;}
+    input,select{width:100%;padding:11px 12px;border:1px solid #d0d7de;border-radius:10px;font-size:var(--fs-md);background:#fff;}
+    input:focus,select:focus{outline:none;border-color:#84cc16;box-shadow:0 0 0 3px rgba(132,204,22,.15);}
+    .btn{display:inline-block;width:100%;padding:11px 16px;border-radius:999px;border:1px solid var(--green);background:var(--green);color:#fff;font-weight:600;cursor:pointer;}
+    .stack{display:grid;gap:12px;}
+    .result{background:#fff;border:2px solid var(--green-100);border-radius:var(--radius);padding:16px;}
+    .result h3{margin:0 0 10px;color:var(--green-700);font-size:var(--fs-lg);border-bottom:1px solid var(--green-100);padding-bottom:6px;}
+    .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #e7e7e7;}
+    .highlight{background:var(--green-100);border-radius:10px;margin-top:10px;padding:10px 14px;display:flex;justify-content:space-between;font-size:var(--fs-lg);font-weight:700;color:var(--green-700);}
+    .detail{margin-top:10px;background:#fff;border:1px dashed var(--green);padding:12px;border-radius:12px;font-size:var(--fs-sm);}
+    footer{text-align:center;color:#666;font-size:var(--fs-xs);margin:20px 0 40px;}
+    .hint{font-size:12px;color:#666;margin-top:4px;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>คำนวณภาษีมูลค่าเพิ่ม (VAT) และหัก ณ ที่จ่าย (WHT) ◉●•◦Siluck◦•●◉</h1>
+  </header>
+
+  <div class="wrap">
+    <!-- Zone 1 -->
+    <section class="zone">
+      <div class="zone-head">คำนวณ VAT + หัก ณ ที่จ่าย</div>
+      <div class="zone-body">
+        <div class="zone-grid">
+          <div class="stack">
+            <div>
+              <label>ยอดก่อน VAT (บาท)</label>
+              <input id="amount" type="number" placeholder="เช่น 10000">
+            </div>
+            <div>
+              <label>อัตรา VAT (%)</label>
+              <input id="vat_rate" type="number" value="7">
+              <div class="hint">ค่าเริ่มต้น 7% (ปรับได้)</div>
+            </div>
+            <div>
+              <label>หัก ณ ที่จ่าย (%)</label>
+              <select id="wht_rate">
+                <option value="0">0% — ไม่หัก</option>
+                <option value="1">1% — ค่าขนส่งทั่วไป / e-Withholding</option>
+                <option value="2">2% — ค่าโฆษณา / ค่าคอมมิชชันบางประเภท</option>
+                <option value="3" selected>3% — ค่าบริการทั่วไป / บริการพ่วงขนส่ง</option>
+                <option value="5">5% — ค่าเช่า / รางวัล / ค่าสิทธิ์บางกรณี</option>
+                <option value="10">10% — ดอกเบี้ย / เงินปันผลบางกรณี</option>
+              </select>
+              <div class="hint">หมายเหตุ: อัตรา 1% ใช้กับค่าขนส่งทั่วไปตามหลักกรมสรรพากร</div>
+            </div>
+            <button class="btn" id="calc">คำนวณ</button>
+            <div id="calc_detail" class="detail"><b>รายละเอียดการคำนวณจริง</b><br>กด “คำนวณ” แล้วรายละเอียดจะปรากฏที่นี่</div>
+            <div class="notice">หลักการคำนวณ : <b>WHT คิดจากฐานก่อน VAT</b> • VAT = ฐาน × อัตรา • <b>ยอดโอนสุทธิ</b> = รวม VAT − หัก ณ ที่จ่าย</div>
+          </div>
+          <aside class="result">
+            <h3>ผลลัพธ์ คำนวณ VAT + หัก ณ ที่จ่าย</h3>
+            <div class="row"><div>ฐานก่อน VAT</div><div id="out_base">—</div></div>
+            <div class="row"><div>VAT</div><div id="out_vat">—</div></div>
+            <div class="row"><div>รวม VAT</div><div id="out_gross">—</div></div>
+            <div class="row"><div>หัก ณ ที่จ่าย</div><div id="out_wht">—</div></div>
+            <div class="highlight"><div>ยอดโอนสุทธิ</div><div id="out_net">—</div></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- Zone 2 -->
+    <section class="zone">
+      <div class="zone-head">คำนวณ “ถอด VAT” (รู้ยอด VAT → หา “ค่าสินค้าก่อน VAT”)</div>
+      <div class="zone-body">
+        <div class="zone-grid">
+          <div class="stack">
+            <div>
+              <label>ยอด VAT (บาท)</label>
+              <input id="vat_known" type="number" placeholder="เช่น 700">
+            </div>
+            <div>
+              <label>อัตรา VAT (%)</label>
+              <input id="vat_rate_known" type="number" value="7">
+            </div>
+            <button class="btn" id="calc_from_vat">คำนวณจากยอด VAT</button>
+            <div id="calc_detail2" class="detail"><b>รายละเอียดการคำนวณจริง</b><br>กด “คำนวณจากยอด VAT” แล้วรายละเอียดจะปรากฏที่นี่</div>
+            <div class="notice">หลักการคำนวณ : <b>ฐานก่อน VAT = VAT ÷ อัตรา VAT</b> • รวม VAT = ฐาน + VAT</div>
+          </div>
+          <aside class="result">
+            <h3>ผลลัพธ์ คำนวณ “ถอด VAT”</h3>
+            <div class="row"><div>ฐานก่อน VAT (ค่าสินค้า)</div><div id="out_base_from_vat">—</div></div>
+            <div class="row"><div>ราคารวม VAT</div><div id="out_gross_from_vat">—</div></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <footer>creat by : Siluck 0943464244</footer>
+  </div>
+
+  <script>
+    const fmt = n => isFinite(n) ? n.toLocaleString('th-TH',{maximumFractionDigits:2}) : '—';
+    document.getElementById('calc').addEventListener('click',()=>{
+      const a=Number(amount.value||0),
+            v=Number(vat_rate.value||0)/100,
+            w=Number(wht_rate.value||0)/100;
+      const base=a, vat=base*v, gross=base+vat, wht=base*w, net=gross-wht;
+      out_base.textContent=fmt(base);
+      out_vat.textContent=fmt(vat);
+      out_gross.textContent=fmt(gross);
+      out_wht.textContent=fmt(wht);
+      out_net.textContent=fmt(net);
+      calc_detail.innerHTML=`<b>รายละเอียดการคำนวณจริง</b><br>
+        VAT = ${fmt(base)} × ${(v*100).toFixed(2)}% = ${fmt(vat)}<br>
+        รวม VAT = ${fmt(base)} + ${fmt(vat)} = ${fmt(gross)}<br>
+        หัก ณ ที่จ่าย = ${fmt(base)} × ${(w*100).toFixed(2)}% = ${fmt(wht)}<br>
+        ยอดโอนสุทธิ = ${fmt(gross)} − ${fmt(wht)} = ${fmt(net)}`;
+    });
+    document.getElementById('calc_from_vat').addEventListener('click',()=>{
+      const VAT=Number(vat_known.value||0),
+            r=Number(vat_rate_known.value||0)/100;
+      if(r<=0){ alert('กรุณาระบุอัตรา VAT (> 0)'); return; }
+      const base=VAT/r, gross=base+VAT;
+      out_base_from_vat.textContent=fmt(base);
+      out_gross_from_vat.textContent=fmt(gross);
+      calc_detail2.innerHTML=`<b>รายละเอียดการคำนวณจริง</b><br>
+        ฐานก่อน VAT = ${fmt(VAT)} ÷ ${(r*100).toFixed(2)}% = ${fmt(base)}<br>
+        รวม VAT = ${fmt(base)} + ${fmt(VAT)} = ${fmt(gross)}`;
+    });
+  </script>
+</body>
+</html>
