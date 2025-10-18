@@ -1,177 +1,297 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>คำนวณ VAT + หัก ณ ที่จ่าย (• Siluck •)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>คำนวณ VAT + หัก ณ ที่จ่าย —  (◉●•◦Siluck◦•●◉)</title>
 
-<style>
-:root{
-  --green:#166534; --green-100:#e6f7e6; --green-200:#cfe6cf; --green-700:#134e13;
-  --radius:14px; --gap:14px;
-  --fs-xs:13px; --fs-sm:14px; --fs-md:16px; --fs-lg:18px;
-}
-body{font-family:"Inter","Noto Sans Thai",sans-serif;margin:0;background:#f7f7fb;color:#1f2328;line-height:1.55;}
-header{position:sticky;top:0;background:#fff;border-bottom:1px solid #eee;padding:16px;z-index:10;}
-h1{font-size:20px;font-weight:600;margin:0 0 4px;}
-.sub{font-size:12.5px;color:#666;}
-.wrap{max-width:950px;margin:0 auto;padding:20px;}
-.card{background:#fff;border-radius:var(--radius);box-shadow:0 6px 20px rgba(0,0,0,.06);padding:20px;}
-.grid{display:grid;gap:var(--gap);}
-@media(min-width:860px){.grid-2{grid-template-columns:1.1fr .9fr;}}
-label{font-size:var(--fs-sm);font-weight:500;color:#333;}
-input,select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-size:var(--fs-md);}
-.btn{padding:10px 16px;border-radius:999px;border:1px solid var(--green);background:var(--green);color:#fff;cursor:pointer;width:100%;font-weight:600;}
-.btn:hover{filter:brightness(1.1);}
-.seg{display:flex;gap:8px;flex-wrap:wrap;}
-.seg button{flex:1 1 180px;padding:10px;border-radius:999px;border:1px solid #d0d7de;background:#fff;cursor:pointer;font-weight:500;}
-.seg button.active{background:var(--green);color:#fff;border-color:var(--green);}
-.warn{background:#fff7e6;border:1px solid #ffe1a8;color:#60480f;padding:10px 12px;border-radius:10px;font-size:13px;}
-.notice{background:#fff3cd;border:1px solid #ffe69c;color:#000;padding:10px 12px;border-radius:10px;font-size:13px;margin-top:12px;}
-footer{text-align:center;color:#666;font-size:12px;margin:25px 0 40px;}
-.mini{background:#f6fff6;border:1px solid #cfe6cf;border-radius:12px;padding:12px;}
+  <!-- Fonts: Inter + Noto Sans Thai -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 
-.result{
-  background:#fff;
-  border-radius:var(--radius);
-  padding:18px 20px;
-  border:2px solid var(--green-100);
-}
-.result h3{
-  color:var(--green-700);
-  font-size:var(--fs-lg);
-  margin-top:0;margin-bottom:12px;
-  border-bottom:1px solid var(--green-100);
-  padding-bottom:6px;
-}
-.result .row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:6px 0;
-  font-size:var(--fs-md);
-  border-bottom:1px dashed #e2e2e2;
-}
-.result .row:last-child{border-bottom:none;}
-.result .label{color:#333;}
-.result .value{font-weight:600;color:#000;text-align:right;min-width:120px;}
-.result .highlight{
-  background:var(--green-100);
-  border-radius:10px;
-  margin-top:10px;
-  padding:10px 14px;
-  display:flex;justify-content:space-between;
-  align-items:center;
-  font-size:var(--fs-lg);
-  font-weight:700;
-  color:var(--green-700);
-}
-.formula{margin-top:14px;background:var(--green-100);border:1px solid var(--green-200);padding:12px;border-radius:12px;font-size:14px;color:var(--green-700);}
-.detail{margin-top:10px;background:#fff;border:1px dashed var(--green);padding:12px;border-radius:12px;font-size:14px;}
-</style>
+  <style>
+    :root{
+      --gap:14px; --radius:14px;
+      --green:#166534; --green-100:#e6f7e6; --green-200:#cfe6cf; --green-700:#134e13;
+      --yellow:#fff3cd; --yellow-border:#ffe69c;
+      --fs-xs:12.5px; --fs-sm:14px; --fs-md:16px; --fs-lg:18px; --fs-xl:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family:"Inter","Noto Sans Thai",system-ui,-apple-system,"Segoe UI",Roboto,"TH Sarabun New",Tahoma,sans-serif;
+      margin:0; background:#f7f7fb; color:#1f2328; line-height:1.55;
+    }
+    header{position:sticky;top:0;background:#fff;border-bottom:1px solid #eee;padding:16px;z-index:10}
+    h1{font-size:var(--fs-xl);font-weight:600;margin:0 0 4px}
+    .sub{font-size:var(--fs-xs);color:#666}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+
+    /* Zone */
+    .zone{background:#fff;border-radius:var(--radius);box-shadow:0 6px 20px rgba(0,0,0,.06);overflow:hidden;margin-bottom:18px}
+    .zone-head{
+      background:var(--yellow); border-bottom:1px solid var(--yellow-border);
+      padding:12px 16px; font-weight:600; font-size:var(--fs-lg);
+    }
+    .zone-body{padding:16px}
+    .notice{
+      background:var(--yellow); border:1px solid var(--yellow-border); color:#000;
+      padding:10px 12px; border-radius:10px; font-size:var(--fs-sm);
+    }
+
+    /* Grid in zone */
+    .zone-grid{display:grid; gap:16px}
+    @media(min-width:900px){ .zone-grid{grid-template-columns:1.1fr .9fr} }
+
+    label{font-size:var(--fs-sm);font-weight:500;color:#333}
+    input,select{
+      width:100%;padding:11px 12px;border:1px solid #d0d7de;border-radius:10px;font-size:var(--fs-md);background:#fff
+    }
+    input:focus,select:focus{outline:none;border-color:#84cc16;box-shadow:0 0 0 3px rgba(132,204,22,.15)}
+    .seg{display:flex;gap:8px;flex-wrap:wrap}
+    .seg button{
+      flex:1 1 180px;padding:10px;border-radius:999px;border:1px solid #d0d7de;background:#fff;cursor:pointer;font-weight:500
+    }
+    .seg button.active{background:var(--green);color:#fff;border-color:var(--green)}
+    .btn{
+      display:inline-block;width:100%;padding:11px 16px;border-radius:999px;
+      border:1px solid var(--green);background:var(--green);color:#fff;font-weight:600;cursor:pointer
+    }
+    .stack{display:grid;gap:12px}
+
+    /* Result panel (right) */
+    .result{
+      background:#fff;border:2px solid var(--green-100);border-radius:var(--radius);padding:16px
+    }
+    .result h3{margin:0 0 10px;color:var(--green-700);font-size:var(--fs-lg);border-bottom:1px solid var(--green-100);padding-bottom:6px}
+    .row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed #e7e7e7}
+    .row:last-child{border-bottom:none}
+    .label{color:#333}
+    .value{text-align:right;min-width:140px;font-weight:600}
+    .highlight{
+      background:var(--green-100);border-radius:10px;margin-top:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;
+      font-size:var(--fs-lg);font-weight:700;color:var(--green-700)
+    }
+    .formula{
+      margin-top:12px;background:var(--green-100);border:1px solid var(--green-200);
+      padding:12px;border-radius:12px;font-size:var(--fs-sm);color:var(--green-700)
+    }
+    .detail{margin-top:10px;background:#fff;border:1px dashed var(--green);padding:12px;border-radius:12px;font-size:var(--fs-sm)}
+
+    footer{text-align:center;color:#666;font-size:var(--fs-xs);margin:20px 0 40px}
+  </style>
 </head>
 <body>
-<header>
-  <h1>คำนวณ VAT + หัก ณ ที่จ่าย</h1>
-  <div class="sub">เลือกชนิดตัวเลขที่คุณมี แล้วระบบจะคำนวณให้อัตโนมัติ</div>
-</header>
+  <header>
+    <h1>คำนวณภาษีมูลค่าเพิ่ม (VAT) และหัก ณ ที่จ่าย (WHT) ◉●•◦Siluck◦•●◉</h1>
+    <div class="sub">ฟอนต์ Inter + Noto Sans Thai • แบ่งเป็น 2 โซนชัดเจน • ผลลัพธ์แสดงด้านขวา</div>
+  </header>
 
-<div class="wrap">
-  <div class="card grid grid-2">
-    <div class="grid">
-      <div>
-        <label>ชนิดยอดที่กรอก</label>
-        <div class="seg">
-          <button class="active" data-mode="base">ก่อน VAT</button>
-          <button data-mode="gross">รวม VAT</button>
-          <button data-mode="net">หลังหัก ณ ที่จ่าย</button>
+  <div class="wrap">
+
+    <!-- =================== ZONE 1 =================== -->
+    <section class="zone" id="zone1">
+      <div class="zone-head">คำนวณ VAT + หัก ณ ที่จ่าย</div>
+      <div class="zone-body">
+        <div class="zone-grid">
+          <!-- Left: Inputs + Details + Principles -->
+          <div class="stack">
+            <!-- Inputs -->
+            <div>
+              <label>ชนิดยอดที่กรอก</label>
+              <div class="seg">
+                <button class="active" data-mode="base">ก่อน VAT</button>
+                <button data-mode="gross">รวม VAT</button>
+                <button data-mode="net">ยอดโอน หลังหัก ณ ที่จ่าย</button>
+              </div>
+            </div>
+            <div>
+              <label id="amt_label">ยอดก่อน VAT (บาท)</label>
+              <input id="amount" type="number" min="0" placeholder="เช่น 10000" />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div>
+                <label>อัตรา VAT (%)</label>
+                <input id="vat_rate" type="number" min="0" step="0.01" value="7" />
+                <div style="font-size:12px;color:#666;margin-top:4px">ค่าเริ่มต้น 7% (ปรับได้ตามจริง)</div>
+              </div>
+              <div>
+                <label>หัก ณ ที่จ่าย (%)</label>
+                <select id="wht_rate">
+                  <option value="0">0% (ไม่หัก)</option>
+                  <option value="1">1% (บางกรณีพิเศษ/e-WHT)</option>
+                  <option value="2">2% (ค่าโฆษณา ฯลฯ)</option>
+                  <option value="3" selected>3% (ค่าบริการทั่วไป)</option>
+                  <option value="5">5% (ค่าเช่า/รางวัล ฯลฯ)</option>
+                  <option value="10">10% (ดอกเบี้ย/ปันผลบางกรณี)</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn" id="calc">คำนวณ</button>
+
+            <!-- Details under inputs -->
+            <div id="calc_detail" class="detail">
+              <b>รายละเอียดการคำนวณจริง</b>
+              <div style="margin-top:6px;color:#555">กด “คำนวณ” แล้วรายละเอียดจะปรากฏที่นี่</div>
+            </div>
+
+            <!-- Principles (yellow) -->
+            <div class="notice">
+              หลักการคำนวณ (โซนนี้): <b>WHT คิดจากฐานก่อน VAT</b> • VAT = ฐาน × อัตรา •
+              <b>ยอดโอนสุทธิ</b> = รวม VAT − หัก ณ ที่จ่าย
+            </div>
+
+            <!-- Optional: formula reference -->
+            <div class="formula">
+              <b>สูตรอ้างอิง:</b><br>
+              VAT = ฐาน × (VAT%)<br>
+              รวม VAT = ฐาน + VAT<br>
+              หัก ณ ที่จ่าย = ฐาน × (WHT%)<br>
+              ยอดโอนสุทธิ = รวม VAT − หัก ณ ที่จ่าย
+            </div>
+          </div>
+
+          <!-- Right: Results -->
+          <aside class="result" aria-live="polite">
+            <h3>ผลลัพธ์ คำนวณ VAT + หัก ณ ที่จ่าย</h3>
+            <div class="row"><div class="label">ฐานก่อน VAT</div><div class="value" id="out_base">—</div></div>
+            <div class="row"><div class="label">VAT</div><div class="value" id="out_vat">—</div></div>
+            <div class="row"><div class="label">ราคารวม VAT</div><div class="value" id="out_gross">—</div></div>
+            <div class="row"><div class="label">หัก ณ ที่จ่าย</div><div class="value" id="out_wht">—</div></div>
+            <div class="highlight"><div>ยอดโอนสุทธิ</div><div id="out_net">—</div></div>
+          </aside>
         </div>
       </div>
-      <div class="grid">
-        <div><label id="amt_label">ยอดก่อน VAT (บาท)</label><input id="amount" type="number" placeholder="เช่น 10000"></div>
-        <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px;">
-          <div><label>VAT (%)</label><input id="vat_rate" type="number" value="7"></div>
-          <div><label>หัก ณ ที่จ่าย (%)</label>
-            <select id="wht_rate"><option value="0">0%</option><option value="1">1%</option><option value="2">2%</option><option value="3" selected>3%</option><option value="5">5%</option><option value="10">10%</option></select>
-          </div>
-        </div>
-        <button id="calc" class="btn">คำนวณ</button>
-        <div class="warn">หลักการ: <b>หัก ณ ที่จ่ายคิดจากฐานก่อน VAT</b> • VAT = ฐาน × อัตรา</div>
+    </section>
 
-        <div class="mini" style="margin-top:10px;">
-          <b>ถอด VAT เมื่อรู้ยอด VAT</b>
-          <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
-            <div><label>ยอด VAT</label><input id="vat_known" type="number" placeholder="เช่น 700"></div>
-            <div><label>อัตรา VAT (%)</label><input id="vat_rate_known" type="number" value="7"></div>
+    <!-- =================== ZONE 2 =================== -->
+    <section class="zone" id="zone2">
+      <div class="zone-head">คำนวณ “ถอด VAT” (รู้ยอด VAT → หา “ค่าสินค้าก่อน VAT”)</div>
+      <div class="zone-body">
+        <div class="zone-grid">
+          <!-- Left: Inputs + Details + Principles -->
+          <div class="stack">
+            <!-- Inputs -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div>
+                <label>ยอด VAT (บาท)</label>
+                <input id="vat_known" type="number" min="0" placeholder="เช่น 700" />
+              </div>
+              <div>
+                <label>อัตรา VAT (%)</label>
+                <input id="vat_rate_known" type="number" min="0" step="0.01" value="7" />
+              </div>
+            </div>
+            <button class="btn" id="calc_from_vat">คำนวณจากยอด VAT</button>
+
+            <!-- Details -->
+            <div id="calc_detail2" class="detail">
+              <b>รายละเอียดการคำนวณจริง</b>
+              <div style="margin-top:6px;color:#555">กด “คำนวณจากยอด VAT” แล้วรายละเอียดจะปรากฏที่นี่</div>
+            </div>
+
+            <!-- Principles (yellow) -->
+            <div class="notice">
+              หลักการคำนวณ (โซนนี้): <b>ฐานก่อน VAT = VAT ÷ อัตรา VAT</b> • รวม VAT = ฐาน + VAT
+            </div>
+
+            <div class="formula">
+              <b>สูตรอ้างอิง:</b><br>
+              ฐานก่อน VAT = VAT ÷ (VAT%)<br>
+              รวม VAT = ฐาน + VAT
+            </div>
           </div>
-          <button id="calc_from_vat" class="btn" style="margin-top:10px;">คำนวณจากยอด VAT</button>
-          <div id="out_from_vat" style="margin-top:8px;font-size:15px;">
-            <div>ฐานก่อน VAT: <b id="out_base_from_vat">—</b></div>
-            <div>รวม VAT: <b id="out_gross_from_vat">—</b></div>
-          </div>
+
+          <!-- Right: Results -->
+          <aside class="result" aria-live="polite">
+            <h3>ผลลัพธ์ คำนวณ “ถอด VAT”</h3>
+            <div class="row"><div class="label">ฐานก่อน VAT (ค่าสินค้า)</div><div class="value" id="out_base_from_vat">—</div></div>
+            <div class="row"><div class="label">ราคารวม VAT</div><div class="value" id="out_gross_from_vat">—</div></div>
+          </aside>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- RESULT AREA -->
-    <div class="result">
-      <h3>ผลลัพธ์การคำนวณ</h3>
-      <div class="row"><div class="label">ฐานก่อน VAT</div><div class="value" id="out_base">—</div></div>
-      <div class="row"><div class="label">VAT</div><div class="value" id="out_vat">—</div></div>
-      <div class="row"><div class="label">รวม VAT</div><div class="value" id="out_gross">—</div></div>
-      <div class="row"><div class="label">หัก ณ ที่จ่าย</div><div class="value" id="out_wht">—</div></div>
-      <div class="highlight"><div>ยอดโอนสุทธิ</div><div id="out_net">—</div></div>
-      <div class="notice">หมายเหตุ: ใช้คำนวณเบื้องต้น — หัก ณ ที่จ่ายจาก <b>ฐานก่อน VAT</b></div>
-      <div class="formula"><b>สูตรที่ใช้:</b><br>VAT = ฐาน × (VAT%)<br>รวม VAT = ฐาน + VAT<br>หัก ณ ที่จ่าย = ฐาน × (WHT%)<br>ยอดโอนสุทธิ = รวม VAT − หัก ณ ที่จ่าย</div>
-      <div id="calc_detail" class="detail"><b>รายละเอียดการคำนวณจริง</b><div style="margin-top:6px;color:#555">กด “คำนวณ” เพื่อดูรายละเอียด</div></div>
-    </div>
+    <footer>
+      ผู้จัดทำ: creat by : Siluck 0943464244
+    </footer>
   </div>
 
-  <footer>creat by : Siluck 0943464244</footer>
-</div>
+  <script>
+    const fmt = n => isFinite(n) ? n.toLocaleString('th-TH',{maximumFractionDigits:2}) : '—';
+    const fmtRaw = n => isFinite(n) ? n.toLocaleString('th-TH',{maximumFractionDigits:2}) : n;
+    let mode = 'base';
 
-<script>
-const fmt=n=>isFinite(n)?n.toLocaleString('th-TH',{maximumFractionDigits:2}):'—';
-const fmtRaw=n=>isFinite(n)?n.toLocaleString('th-TH',{maximumFractionDigits:2}):n;
-let mode='base';
-document.querySelectorAll('.seg button').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    mode=b.dataset.mode;
-    document.getElementById('amt_label').textContent=
-      mode==='base'?'ยอดก่อน VAT (บาท)':mode==='gross'?'ราคารวม VAT (บาท)':'ยอดโอนสุทธิ หลังหัก ณ ที่จ่าย (บาท)';
-  });
-});
-document.getElementById('calc').addEventListener('click',()=>{
-  const A=+document.getElementById('amount').value||0;
-  const r=(+document.getElementById('vat_rate').value||0)/100;
-  const w=(+document.getElementById('wht_rate').value||0)/100;
-  let base,vat,gross,wht,net,steps=[];
-  if(mode==='base'){base=A;vat=base*r;gross=base+vat;wht=base*w;net=gross-wht;}
-  else if(mode==='gross'){gross=A;base=gross/(1+r);vat=gross-base;wht=base*w;net=gross-wht;}
-  else{net=A;base=net/(1+r-w);vat=base*r;gross=base+vat;wht=base*w;}
-  document.getElementById('out_base').textContent=fmt(base);
-  document.getElementById('out_vat').textContent=fmt(vat);
-  document.getElementById('out_gross').textContent=fmt(gross);
-  document.getElementById('out_wht').textContent=fmt(wht);
-  document.getElementById('out_net').textContent=fmt(net);
-  document.getElementById('calc_detail').innerHTML='<b>รายละเอียดการคำนวณจริง</b><div style="margin-top:8px;">'
-    +`VAT = ${fmtRaw(base)} × ${(r*100).toFixed(2)}% = <b>${fmtRaw(vat)}</b><br>`
-    +`รวม VAT = ${fmtRaw(base)} + ${fmtRaw(vat)} = <b>${fmtRaw(gross)}</b><br>`
-    +`หัก ณ ที่จ่าย = ${fmtRaw(base)} × ${(w*100).toFixed(2)}% = <b>${fmtRaw(wht)}</b><br>`
-    +`ยอดโอนสุทธิ = ${fmtRaw(gross)} − ${fmtRaw(wht)} = <b>${fmtRaw(net)}</b></div>`;
-});
-document.getElementById('calc_from_vat').addEventListener('click',()=>{
-  const VAT=+document.getElementById('vat_known').value||0;
-  const r=(+document.getElementById('vat_rate_known').value||0)/100;
-  const base=VAT/r,gross=base+VAT;
-  document.getElementById('out_base_from_vat').textContent=fmt(base);
-  document.getElementById('out_gross_from_vat').textContent=fmt(gross);
-});
-</script>
+    // Zone 1: Mode switch
+    document.querySelectorAll('#zone1 .seg button').forEach(b=>{
+      b.addEventListener('click',()=>{
+        document.querySelectorAll('#zone1 .seg button').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        mode=b.dataset.mode;
+        document.getElementById('amt_label').textContent=
+          mode==='base'?'ยอดก่อน VAT (บาท)':mode==='gross'?'ราคารวม VAT (บาท)':'ยอดโอนสุทธิ หลังหัก ณ ที่จ่าย (บาท)';
+        // clear outputs for clarity
+        ['out_base','out_vat','out_gross','out_wht','out_net'].forEach(id=>document.getElementById(id).textContent='—');
+        document.getElementById('calc_detail').innerHTML =
+          '<b>รายละเอียดการคำนวณจริง</b><div style="margin-top:6px;color:#555">กด “คำนวณ” แล้วรายละเอียดจะปรากฏที่นี่</div>';
+      });
+    });
+
+    // Zone 1: Main calc
+    document.getElementById('calc').addEventListener('click',()=>{
+      const A = Number(document.getElementById('amount').value || 0);
+      const r = Number(document.getElementById('vat_rate').value || 0)/100;
+      const w = Number(document.getElementById('wht_rate').value || 0)/100;
+
+      let base, vat, gross, wht, net, steps=[];
+      if(mode==='base'){
+        base=A; vat=base*r; gross=base+vat; wht=base*w; net=gross-wht;
+        steps.push(`VAT = ${fmtRaw(base)} × ${(r*100).toFixed(2)}% = <b>${fmtRaw(vat)}</b>`);
+        steps.push(`รวม VAT = ${fmtRaw(base)} + ${fmtRaw(vat)} = <b>${fmtRaw(gross)}</b>`);
+        steps.push(`หัก ณ ที่จ่าย = ${fmtRaw(base)} × ${(w*100).toFixed(2)}% = <b>${fmtRaw(wht)}</b>`);
+        steps.push(`ยอดโอนสุทธิ = ${fmtRaw(gross)} − ${fmtRaw(wht)} = <b>${fmtRaw(net)}</b>`);
+      }else if(mode==='gross'){
+        const grossIn=A, denom=1+r; if(denom<=0){alert('อัตรา VAT ไม่ถูกต้อง');return;}
+        gross=grossIn; base=gross/denom; vat=gross-base; wht=base*w; net=gross-wht;
+        steps.push(`ฐานก่อน VAT = ${fmtRaw(gross)} ÷ (1 + ${(r*100).toFixed(2)}%) = <b>${fmtRaw(base)}</b>`);
+        steps.push(`VAT = ${fmtRaw(base)} × ${(r*100).toFixed(2)}% = <b>${fmtRaw(vat)}</b>`);
+        steps.push(`หัก ณ ที่จ่าย = ${fmtRaw(base)} × ${(w*100).toFixed(2)}% = <b>${fmtRaw(wht)}</b>`);
+        steps.push(`ยอดโอนสุทธิ = ${fmtRaw(gross)} − ${fmtRaw(wht)} = <b>${fmtRaw(net)}</b>`);
+      }else{ // net known
+        const netIn=A, denom=1 + r - w; if(denom<=0){alert('อัตรา (1 + VAT - WHT) ต้องมากกว่า 0');return;}
+        net=netIn; base=net/denom; vat=base*r; gross=base+vat; wht=base*w;
+        steps.push(`ฐานก่อน VAT = ${fmtRaw(net)} ÷ (1 + ${(r*100).toFixed(2)}% − ${(w*100).toFixed(2)}%) = <b>${fmtRaw(base)}</b>`);
+        steps.push(`VAT = ${fmtRaw(base)} × ${(r*100).toFixed(2)}% = <b>${fmtRaw(vat)}</b>`);
+        steps.push(`รวม VAT = ${fmtRaw(base)} + ${fmtRaw(vat)} = <b>${fmtRaw(gross)}</b>`);
+        steps.push(`หัก ณ ที่จ่าย = ${fmtRaw(base)} × ${(w*100).toFixed(2)}% = <b>${fmtRaw(wht)}</b>`);
+      }
+      // Outputs
+      document.getElementById('out_base').textContent=fmt(base);
+      document.getElementById('out_vat').textContent=fmt(vat);
+      document.getElementById('out_gross').textContent=fmt(gross);
+      document.getElementById('out_wht').textContent=fmt(wht);
+      document.getElementById('out_net').textContent=fmt(net ?? (gross - (base*w)));
+      document.getElementById('calc_detail').innerHTML =
+        '<b>รายละเอียดการคำนวณจริง</b><div style="margin-top:8px;display:grid;gap:6px;">'
+        + steps.map(s=>`<div>${s}</div>`).join('') + '</div>';
+    });
+
+    // Zone 2: Reverse VAT
+    document.getElementById('calc_from_vat').addEventListener('click',()=>{
+      const VAT = Number(document.getElementById('vat_known').value || 0);
+      const r = Number(document.getElementById('vat_rate_known').value || 0)/100;
+      if(r<=0){alert('กรุณาใส่อัตรา VAT (> 0)');return;}
+      const base = VAT / r;
+      const gross = base + VAT;
+
+      document.getElementById('out_base_from_vat').textContent = fmt(base);
+      document.getElementById('out_gross_from_vat').textContent = fmt(gross);
+
+      document.getElementById('calc_detail2').innerHTML =
+        '<b>รายละเอียดการคำนวณจริง</b>'
+        + `<div style="margin-top:8px">ฐานก่อน VAT = ${fmtRaw(VAT)} ÷ ${(r*100).toFixed(2)}% = <b>${fmtRaw(base)}</b><br>`
+        + `รวม VAT = ${fmtRaw(base)} + ${fmtRaw(VAT)} = <b>${fmtRaw(gross)}</b></div>`;
+    });
+  </script>
 </body>
 </html>
