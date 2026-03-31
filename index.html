@@ -1,142 +1,140 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VAT Checker Pro</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>คำนวณ VAT + หัก ณ ที่จ่าย — (◉●•◦Siluck◦•●◉)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 
-<style>
-  body {
-    font-family: "Prompt", sans-serif;
-    background: #f6f8fb;
-    margin: 0;
-    padding: 20px;
-  }
-
-  .container {
-    max-width: 500px;
-    margin: auto;
-  }
-
-  .card {
-    background: #fff;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-  }
-
-  h2 {
-    margin-bottom: 15px;
-  }
-
-  label {
-    font-size: 14px;
-    color: #555;
-  }
-
-  input {
-    width: 100%;
-    padding: 12px;
-    margin-top: 6px;
-    margin-bottom: 15px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    font-size: 16px;
-  }
-
-  .result {
-    background: #f1f5f9;
-    padding: 15px;
-    border-radius: 12px;
-    font-size: 15px;
-    line-height: 1.6;
-  }
-
-  .success {
-    color: #16a34a;
-    font-weight: bold;
-  }
-
-  .error {
-    color: #dc2626;
-    font-weight: bold;
-  }
-
-  .title {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-</style>
+  <style>
+    :root{
+      --green:#166534; --green-100:#e6f7e6; --green-700:#134e13;
+      --gray:#f1f1f1;
+    }
+    body{font-family:"Inter","Noto Sans Thai",sans-serif;margin:0;background:#f7f7fb;}
+    .wrap{max-width:1100px;margin:auto;padding:20px;}
+    .zone{background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.06);margin-bottom:18px;}
+    .zone-head{background:#fff3cd;padding:12px 16px;font-weight:600;}
+    .zone-body{padding:16px;}
+    .stack{display:grid;gap:12px;}
+    input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;}
+    .btn{padding:10px;border-radius:999px;background:var(--green);color:#fff;border:none;}
+    .result{background:#fff;border:2px solid var(--green-100);padding:16px;border-radius:14px;}
+    .row{display:flex;justify-content:space-between;margin:6px 0;}
+    .highlight{background:var(--green-100);padding:10px;border-radius:10px;font-weight:bold;}
+    .check-box{background:#f1f5f9;padding:14px;border-radius:12px;margin-top:10px;}
+    .ok{color:green;font-weight:bold;}
+    .bad{color:red;font-weight:bold;}
+  </style>
 </head>
 
 <body>
+<div class="wrap">
 
-<div class="container">
+<!-- ===== ของเดิม (ย่อไว้ ไม่แตะ logic) ===== -->
+<section class="zone">
+  <div class="zone-head">คำนวณ VAT + หัก ณ ที่จ่าย</div>
+  <div class="zone-body stack">
+    <input id="amount" type="number" placeholder="ยอดก่อน VAT">
+    <input id="vat_rate" type="number" value="7">
+    <input id="wht_rate" type="number" value="3">
+    <button class="btn" onclick="calc()">คำนวณ</button>
 
-  <div class="card">
-    <div class="title">🔍 VAT Checker Pro</div>
-
-    <label>ราคาที่รวม VAT แล้ว</label>
-    <input type="number" id="gross" placeholder="เช่น 107.00" step="0.01">
-
-    <label>VAT (%)</label>
-    <input type="number" id="vat" value="7">
-
-    <div id="result" class="result">
-      กรอกข้อมูลเพื่อเริ่มคำนวณ...
+    <div class="result">
+      <div class="row"><div>รวม VAT</div><div id="out_gross">—</div></div>
+      <div class="row"><div>ยอดสุทธิ</div><div id="out_net">—</div></div>
     </div>
   </div>
+</section>
+
+<section class="zone">
+  <div class="zone-head">ถอด VAT จากยอด VAT</div>
+  <div class="zone-body stack">
+    <input id="vat_known" type="number" placeholder="VAT">
+    <input id="vat_rate_known" type="number" value="7">
+    <button class="btn" onclick="calc2()">คำนวณ</button>
+
+    <div class="result">
+      <div class="row"><div>ฐาน</div><div id="out_base2">—</div></div>
+      <div class="row"><div>รวม</div><div id="out_gross2">—</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 🔥 ของใหม่ (Zone 3) ===== -->
+<section class="zone">
+  <div class="zone-head">🔍 ตรวจสอบ VAT ย้อนกลับ (Realtime)</div>
+  <div class="zone-body stack">
+
+    <input id="check_gross" type="number" placeholder="ราคาที่รวม VAT แล้ว เช่น 107">
+    <input id="check_vat" type="number" value="7">
+
+    <div id="check_result" class="check-box">
+      กรอกข้อมูลเพื่อเริ่มตรวจสอบ...
+    </div>
+
+  </div>
+</section>
 
 </div>
 
 <script>
-const grossInput = document.getElementById("gross");
-const vatInput = document.getElementById("vat");
-const resultDiv = document.getElementById("result");
+const fmt = n => isFinite(n) ? n.toLocaleString('th-TH',{maximumFractionDigits:2}) : '—';
 
-function calculate() {
-  const gross = parseFloat(grossInput.value);
-  const vatRate = parseFloat(vatInput.value);
+/* ===== ของเดิม ===== */
+function calc(){
+  const a=Number(amount.value||0),
+        v=Number(vat_rate.value||0)/100,
+        w=Number(wht_rate.value||0)/100;
+  const gross=a*(1+v), net=gross-(a*w);
+  out_gross.textContent=fmt(gross);
+  out_net.textContent=fmt(net);
+}
 
-  if (isNaN(gross) || isNaN(vatRate)) {
-    resultDiv.innerHTML = "กรอกข้อมูลเพื่อเริ่มคำนวณ...";
+function calc2(){
+  const VAT=Number(vat_known.value||0),
+        r=Number(vat_rate_known.value||0)/100;
+  const base=VAT/r, gross=base+VAT;
+  out_base2.textContent=fmt(base);
+  out_gross2.textContent=fmt(gross);
+}
+
+/* ===== 🔥 Realtime VAT Check ===== */
+const g=document.getElementById("check_gross");
+const v=document.getElementById("check_vat");
+const res=document.getElementById("check_result");
+
+function check(){
+  const gross=parseFloat(g.value);
+  const rate=parseFloat(v.value);
+
+  if(isNaN(gross)||isNaN(rate)){
+    res.innerHTML="กรอกข้อมูลเพื่อเริ่มตรวจสอบ...";
     return;
   }
 
-  const divisor = 1 + (vatRate / 100);
+  const div=1+(rate/100);
+  const net=gross/div;
+  const vat=gross-net;
+  const back=net*div;
+  const diff=Math.abs(gross-back);
 
-  const net = gross / divisor;
-  const vat = gross - net;
-  const grossBack = net * divisor;
+  let status=diff<0.01
+    ? `<div class="ok">✅ ถูกต้อง</div>`
+    : `<div class="bad">❌ คลาดเคลื่อน ${diff.toFixed(4)}</div>`;
 
-  const diff = Math.abs(gross - grossBack);
-
-  const netFix = net.toFixed(2);
-  const vatFix = vat.toFixed(2);
-  const grossFix = gross.toFixed(2);
-  const grossBackFix = grossBack.toFixed(2);
-
-  let status = "";
-  if (diff < 0.01) {
-    status = `<div class="success">✅ ถูกต้อง</div>`;
-  } else {
-    status = `<div class="error">❌ คลาดเคลื่อน ${diff.toFixed(4)}</div>`;
-  }
-
-  resultDiv.innerHTML = `
-    <b>ราคาเดิม:</b> ${grossFix} บาท<br>
-    <b>ราคาไม่รวม VAT:</b> ${netFix} บาท<br>
-    <b>VAT:</b> ${vatFix} บาท<br>
-    <b>คำนวณกลับ:</b> ${grossBackFix} บาท<br><br>
+  res.innerHTML=`
+    ราคาเดิม: ${fmt(gross)} บาท<br>
+    ไม่รวม VAT: ${fmt(net)} บาท<br>
+    VAT: ${fmt(vat)} บาท<br>
+    คำนวณกลับ: ${fmt(back)} บาท<br><br>
     ${status}
   `;
 }
 
-// Realtime
-grossInput.addEventListener("input", calculate);
-vatInput.addEventListener("input", calculate);
+g.addEventListener("input",check);
+v.addEventListener("input",check);
 </script>
 
 </body>
