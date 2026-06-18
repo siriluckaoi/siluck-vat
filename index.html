@@ -29,6 +29,14 @@ input:focus,select:focus{outline:none;border-color:#84cc16;box-shadow:0 0 0 2px 
 .highlight{background:var(--green-100);border-radius:8px;margin-top:6px;padding:6px 10px;display:flex;justify-content:space-between;font-size:var(--fs-sm);font-weight:700;color:var(--green-700);}
 .detail{margin-top:6px;background:#fff;border:1px dashed var(--green);padding:8px;border-radius:8px;font-size:var(--fs-xs);}
 footer{text-align:center;color:#666;font-size:var(--fs-xs);margin:12px 0;}
+
+/* เพิ่มใหม่: ทำช่องกรอกเปอร์เซ็นต์ให้คล้ายภาพ */
+.percent-wrap{display:flex;align-items:stretch;gap:0;}
+.percent-wrap input,
+.percent-wrap select{border-radius:8px 0 0 8px;}
+.percent-sign{width:48px;display:flex;align-items:center;justify-content:center;background:#e8f0ec;border:1px solid #d0d7de;border-left:0;border-radius:0 8px 8px 0;font-weight:600;color:#475569;}
+.mode-title{display:flex;align-items:center;gap:4px;margin-bottom:4px;font-weight:600;color:#333;}
+.mode-title span{color:#16a34a;font-weight:700;}
 </style>
 </head>
 <body>
@@ -40,16 +48,36 @@ footer{text-align:center;color:#666;font-size:var(--fs-xs);margin:12px 0;}
   <div class="zone-body">
     <div class="zone-grid">
       <div>
-        <label>ยอดก่อน VAT (บาท)<span class="tooltip" title="จำนวนเงินก่อนคำนวณ VAT">?</span></label>
-        <input id="amount" type="number" placeholder="เช่น 10000">
-        <label>อัตรา VAT (%)<span class="tooltip" title="อัตราภาษีมูลค่าเพิ่ม เช่น 7%">?</span></label>
-        <input id="vat_rate" type="number" value="7">
-        <label>หัก ณ ที่จ่าย (%)<span class="tooltip" title="เลือกอัตราที่เหมาะสมตามประเภทค่าบริการ">?</span></label>
-        <select id="wht_rate">
-          <option value="0">0%</option><option value="1">1%</option><option value="2">2%</option>
-          <option value="3" selected>3%</option><option value="5">5%</option><option value="10">10%</option>
+
+        <!-- เพิ่มใหม่: เลือกชนิดราคาที่กรอก -->
+        <div class="mode-title">
+          ราคา <span id="price_mode_text">ก่อน VAT</span>
+        </div>
+        <select id="price_mode" style="margin-bottom:8px;">
+          <option value="before">ก่อน VAT</option>
+          <option value="include">รวม VAT</option>
+          <option value="net">หลังหักภาษี ณ ที่จ่าย</option>
         </select>
-        <button class="btn" id="calc">คำนวณ</button>
+
+        <label id="amount_label">ยอดก่อน VAT (บาท)<span class="tooltip" title="จำนวนเงินตามประเภทที่เลือกด้านบน">?</span></label>
+        <input id="amount" type="number" placeholder="เช่น 10000">
+
+        <label>อัตรา VAT (%)<span class="tooltip" title="อัตราภาษีมูลค่าเพิ่ม เช่น 7%">?</span></label>
+        <div class="percent-wrap">
+          <input id="vat_rate" type="number" value="7">
+          <div class="percent-sign">%</div>
+        </div>
+
+        <label>หัก ณ ที่จ่าย (%)<span class="tooltip" title="เลือกอัตราที่เหมาะสมตามประเภทค่าบริการ">?</span></label>
+        <div class="percent-wrap">
+          <select id="wht_rate">
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+            <option value="3" selected>3</option><option value="5">5</option><option value="10">10</option>
+          </select>
+          <div class="percent-sign">%</div>
+        </div>
+
+        <button class="btn" id="calc" style="margin-top:8px;">คำนวณ</button>
         <button class="btn" id="clear_all" style="background:#999;border-color:#777;margin-top:4px;">ล้างค่า</button>
         <div id="calc_detail" class="detail"></div>
       </div>
@@ -74,8 +102,11 @@ footer{text-align:center;color:#666;font-size:var(--fs-xs);margin:12px 0;}
         <label>ยอด VAT (บาท)<span class="tooltip" title="จำนวน VAT ที่ทราบ">?</span></label>
         <input id="vat_known" type="number" placeholder="เช่น 700">
         <label>อัตรา VAT (%)<span class="tooltip" title="อัตราภาษีที่ใช้คำนวณ">?</span></label>
-        <input id="vat_rate_known" type="number" value="7">
-        <button class="btn" id="calc_from_vat">คำนวณจากยอด VAT</button>
+        <div class="percent-wrap">
+          <input id="vat_rate_known" type="number" value="7">
+          <div class="percent-sign">%</div>
+        </div>
+        <button class="btn" id="calc_from_vat" style="margin-top:8px;">คำนวณจากยอด VAT</button>
         <div id="calc_detail2" class="detail"></div>
       </div>
       <aside class="result">
@@ -96,7 +127,10 @@ footer{text-align:center;color:#666;font-size:var(--fs-xs);margin:12px 0;}
         <label>ราคาที่รวม VAT<span class="tooltip" title="กรอกราคาที่รวม VAT">?</span></label>
         <input id="check_gross" type="number" placeholder="เช่น 10700">
         <label>อัตรา VAT (%)<span class="tooltip" title="อัตราภาษีที่ใช้คำนวณกลับ">?</span></label>
-        <input id="check_vat" type="number" value="7">
+        <div class="percent-wrap">
+          <input id="check_vat" type="number" value="7">
+          <div class="percent-sign">%</div>
+        </div>
       </div>
       <aside class="result">
         <h3>ผลลัพธ์ตรวจสอบ</h3>
@@ -126,22 +160,93 @@ footer{text-align:center;color:#666;font-size:var(--fs-xs);margin:12px 0;}
 // Format ตัวเลข 2 ตำแหน่ง
 const fmt = n => isFinite(n) ? n.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
 
-/* Zone 1 */
+// ตัวช่วยอ่านค่าแบบปลอดภัย
+const num = id => Number(document.getElementById(id).value || 0);
+
+/* Zone 1: เพิ่มโหมด ก่อน VAT / รวม VAT / หลังหัก ณ ที่จ่าย */
+document.getElementById('price_mode').addEventListener('change',()=>{
+  const modeSelect = document.getElementById('price_mode');
+  const text = modeSelect.options[modeSelect.selectedIndex].text;
+
+  price_mode_text.textContent = text;
+
+  if(modeSelect.value === 'before'){
+    amount_label.innerHTML = 'ยอดก่อน VAT (บาท)<span class="tooltip" title="จำนวนเงินก่อนคำนวณ VAT">?</span>';
+    amount.placeholder = 'เช่น 10000';
+  }else if(modeSelect.value === 'include'){
+    amount_label.innerHTML = 'ยอดรวม VAT (บาท)<span class="tooltip" title="จำนวนเงินที่รวม VAT แล้ว">?</span>';
+    amount.placeholder = 'เช่น 10700';
+  }else{
+    amount_label.innerHTML = 'ยอดโอนสุทธิหลังหัก ณ ที่จ่าย (บาท)<span class="tooltip" title="ยอดเงินจริงที่ได้รับหลังหัก ณ ที่จ่าย">?</span>';
+    amount.placeholder = 'เช่น 10400';
+  }
+});
+
 document.getElementById('calc').addEventListener('click',()=>{
-  const a=Number(amount.value||0), v=Number(vat_rate.value||0)/100, w=Number(wht_rate.value||0)/100;
-  const base=a, vat=base*v, gross=base+vat, wht=base*w, net=gross-wht;
-  out_base.textContent=fmt(base); out_vat.textContent=fmt(vat);
-  out_gross.textContent=fmt(gross); out_wht.textContent=fmt(wht);
-  out_net.textContent=fmt(net);
-  calc_detail.innerHTML=`VAT = ${fmt(base)} × ${(v*100).toFixed(2)}% = ${fmt(vat)}<br>
+  const mode = price_mode.value;
+  const a = num('amount');
+  const v = num('vat_rate') / 100;
+  const w = num('wht_rate') / 100;
+
+  if(a <= 0){
+    alert('กรุณากรอกจำนวนเงิน');
+    return;
+  }
+
+  if(v < 0 || w < 0 || (1 + v - w) <= 0){
+    alert('อัตรา VAT หรือหัก ณ ที่จ่ายไม่ถูกต้อง');
+    return;
+  }
+
+  let base = 0, vat = 0, gross = 0, wht = 0, net = 0;
+  let detailMode = '';
+
+  if(mode === 'before'){
+    // ผู้ใช้กรอกยอดก่อน VAT
+    base = a;
+    vat = base * v;
+    gross = base + vat;
+    wht = base * w;
+    net = gross - wht;
+    detailMode = `โหมดที่เลือก: กรอกยอดก่อน VAT = ${fmt(a)}`;
+  }
+
+  if(mode === 'include'){
+    // ผู้ใช้กรอกยอดรวม VAT
+    gross = a;
+    base = gross / (1 + v);
+    vat = gross - base;
+    wht = base * w;
+    net = gross - wht;
+    detailMode = `โหมดที่เลือก: กรอกยอดรวม VAT = ${fmt(a)}`;
+  }
+
+  if(mode === 'net'){
+    // ผู้ใช้กรอกยอดโอนสุทธิหลังหัก ณ ที่จ่าย
+    net = a;
+    base = net / (1 + v - w);
+    vat = base * v;
+    gross = base + vat;
+    wht = base * w;
+    detailMode = `โหมดที่เลือก: กรอกยอดโอนสุทธิหลังหัก ณ ที่จ่าย = ${fmt(a)}`;
+  }
+
+  out_base.textContent = fmt(base);
+  out_vat.textContent = fmt(vat);
+  out_gross.textContent = fmt(gross);
+  out_wht.textContent = fmt(wht);
+  out_net.textContent = fmt(net);
+
+  calc_detail.innerHTML = `${detailMode}<br>
+  VAT = ${fmt(base)} × ${(v*100).toFixed(2)}% = ${fmt(vat)}<br>
   รวม VAT = ${fmt(base)} + ${fmt(vat)} = ${fmt(gross)}<br>
   หัก ณ ที่จ่าย = ${fmt(base)} × ${(w*100).toFixed(2)}% = ${fmt(wht)}<br>
-  ยอดโอนสุทธิ = ${fmt(net)}`;
+  ยอดโอนสุทธิ = ${fmt(gross)} - ${fmt(wht)} = ${fmt(net)}`;
 });
 
 /* Zone 2 */
 document.getElementById('calc_from_vat').addEventListener('click',()=>{
-  const VAT=Number(vat_known.value||0), r=Number(vat_rate_known.value||0)/100;
+  const VAT = num('vat_known'), r = num('vat_rate_known') / 100;
   if(r<=0){ alert('กรุณาระบุอัตรา VAT (>0)'); return; }
   const base=VAT/r, gross=base+VAT;
   out_base_from_vat.textContent=fmt(base); out_gross_from_vat.textContent=fmt(gross);
@@ -161,7 +266,19 @@ function check(){
 
 /* Clear All */
 document.getElementById('clear_all').addEventListener('click',()=>{
-  ['amount','vat_rate','wht_rate','vat_known','vat_rate_known','check_gross','check_vat'].forEach(id=>document.getElementById(id).value='');
+  amount.value = '';
+  vat_rate.value = '7';
+  wht_rate.value = '3';
+  price_mode.value = 'before';
+  price_mode_text.textContent = 'ก่อน VAT';
+  amount_label.innerHTML = 'ยอดก่อน VAT (บาท)<span class="tooltip" title="จำนวนเงินก่อนคำนวณ VAT">?</span>';
+  amount.placeholder = 'เช่น 10000';
+
+  vat_known.value = '';
+  vat_rate_known.value = '7';
+  check_gross.value = '';
+  check_vat.value = '7';
+
   ['out_base','out_vat','out_gross','out_wht','out_net','out_base_from_vat','out_gross_from_vat','c_gross','c_net','c_vat','c_back','c_status','calc_detail','calc_detail2'].forEach(id=>document.getElementById(id).textContent='—');
 });
 
@@ -171,14 +288,13 @@ document.getElementById('export_excel').addEventListener('click',()=>{
   const ws_data=[
     ["VAT+WHT","","ถอด VAT","","ตรวจสอบ VAT",""],
     ["Field","Value","Field","Value","Field","Value"],
-    ["ฐานก่อน VAT",out_base.textContent,"ฐานก่อน VAT",out_base_from_vat.textContent,"ราคาที่รวม VAT",c_gross.textContent],
+    ["โหมดราคา",price_mode.options[price_mode.selectedIndex].text,"","","",""],
+    ["จำนวนเงินที่กรอก",amount.value,"ยอด VAT ที่กรอก",vat_known.value,"ราคาที่รวม VAT",c_gross.textContent],
+    ["ฐานก่อน VAT",out_base.textContent,"ฐานก่อน VAT",out_base_from_vat.textContent,"ไม่รวม VAT",c_net.textContent],
     ["VAT",out_vat.textContent,"","", "VAT",c_vat.textContent],
-    ["รวม VAT",out_gross.textContent,"รวม VAT",out_gross_from_vat.textContent,"",""],
-    ["หัก ณ ที่จ่าย",out_wht.textContent,"","","",""],
-    ["ยอดโอนสุทธิ",out_net.textContent,"","","",""],
-    ["ไม่รวม VAT","","","","",c_net.textContent],
-    ["คำนวณกลับ","","","","",c_back.textContent],
-    ["สถานะ","","","","",c_status.textContent]
+    ["รวม VAT",out_gross.textContent,"รวม VAT",out_gross_from_vat.textContent,"คำนวณกลับ",c_back.textContent],
+    ["หัก ณ ที่จ่าย",out_wht.textContent,"","","สถานะ",c_status.textContent],
+    ["ยอดโอนสุทธิ",out_net.textContent,"","","",""]
   ];
   const ws=XLSX.utils.aoa_to_sheet(ws_data);
   // Set column width
